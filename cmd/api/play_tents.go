@@ -98,12 +98,12 @@ func (app *application) updatePlayTentHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	var input struct {
-		Title       string      `json:"title"`
-		Description string      `json:"description"`
-		Color       string      `json:"color"`
-		Material    string      `json:"material"`
-		Weight      data.Weight `json:"weight"`
-		Size        string      `json:"size"`
+		Title       *string      `json:"title"`
+		Description *string      `json:"description"`
+		Color       *string      `json:"color"`
+		Material    *string      `json:"material"`
+		Weight      *data.Weight `json:"weight"`
+		Size        *string      `json:"size"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -112,12 +112,24 @@ func (app *application) updatePlayTentHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	playTent.Title = input.Title
-	playTent.Description = input.Description
-	playTent.Color = input.Color
-	playTent.Material = input.Material
-	playTent.Weight = input.Weight
-	playTent.Size = input.Size
+	if input.Title != nil {
+		playTent.Title = *input.Title
+	}
+	if input.Description != nil {
+		playTent.Description = *input.Description
+	}
+	if input.Color != nil {
+		playTent.Color = *input.Color
+	}
+	if input.Material != nil {
+		playTent.Material = *input.Material
+	}
+	if input.Weight != nil {
+		playTent.Weight = *input.Weight
+	}
+	if input.Size != nil {
+		playTent.Size = *input.Size
+	}
 
 	v := validator.New()
 	if data.ValidatePlayTent(v, playTent); !v.Valid() {
@@ -127,7 +139,12 @@ func (app *application) updatePlayTentHandler(w http.ResponseWriter, r *http.Req
 
 	err = app.models.PlayTents.Update(playTent)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 

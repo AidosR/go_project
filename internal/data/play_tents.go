@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"go_project/internal/validator"
@@ -40,7 +41,10 @@ func (m PlayTentModel) Insert(p *PlayTent) error {
 
 	args := []interface{}{p.Title, p.Description, p.Color, p.Material, p.Weight, p.Size}
 
-	return m.DB.QueryRow(query, args...).Scan(&p.ID, &p.CreatedAt, &p.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&p.ID, &p.CreatedAt, &p.Version)
 }
 
 func (m PlayTentModel) Get(id int64) (*PlayTent, error) {
@@ -55,7 +59,10 @@ func (m PlayTentModel) Get(id int64) (*PlayTent, error) {
 
 	var p PlayTent
 
-	err := m.DB.QueryRow(query, id).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&p.ID,
 		&p.CreatedAt,
 		&p.Title,
@@ -83,7 +90,7 @@ func (m PlayTentModel) Update(p *PlayTent) error {
 	query := `
 		UPDATE play_tents
 		SET title = $1, description = $2, color = $3, material = $4, weight = $5, size = $6, version = version + 1
-		WHERE id = $7
+		WHERE id = $7 AND version = $8
 		RETURNING version`
 
 	args := []interface{}{
@@ -94,9 +101,23 @@ func (m PlayTentModel) Update(p *PlayTent) error {
 		p.Weight,
 		p.Size,
 		p.ID,
+		p.Version,
 	}
 
-	return m.DB.QueryRow(query, args...).Scan(&p.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&p.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (m PlayTentModel) Delete(id int64) error {
@@ -108,7 +129,10 @@ func (m PlayTentModel) Delete(id int64) error {
 		DELETE FROM play_tents
 		WHERE id = $1`
 
-	result, err := m.DB.Exec(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
