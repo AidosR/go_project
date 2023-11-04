@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (app *application) routes() *httprouter.Router {
+func (app *application) routes() http.Handler {
 
 	router := httprouter.New()
 
@@ -19,5 +19,5 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPatch, "/v1/play_tents/:id", app.updatePlayTentHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/play_tents/:id", app.deletePlayTentHandler)
 
-	return router
+	return app.recoverPanic(router)
 }
