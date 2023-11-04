@@ -13,9 +13,10 @@ func (app *application) routes() *httprouter.Router {
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/play_tents", app.listPlayTentsHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/play_tents", app.createPlayTentHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/play_tents/:id", app.showPlayTentHandler)
-	router.HandlerFunc(http.MethodPut, "/v1/play_tents/:id", app.updatePlayTentHandler)
+	router.HandlerFunc(http.MethodPatch, "/v1/play_tents/:id", app.updatePlayTentHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/play_tents/:id", app.deletePlayTentHandler)
 
 	return router
