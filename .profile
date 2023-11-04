@@ -1,0 +1,1 @@
+export PLAYGROUND_DB_DSN='postgres://playground:playground@localhost/playground?sslmode=disable'
