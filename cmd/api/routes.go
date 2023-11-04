@@ -19,5 +19,5 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/play_tents/:id", app.updatePlayTentHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/play_tents/:id", app.deletePlayTentHandler)
 
-	return app.recoverPanic(router)
+	return app.recoverPanic(app.rateLimit(router))
 }
