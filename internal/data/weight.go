@@ -11,8 +11,8 @@ var ErrInvalidWeightFormat = errors.New("invalid weight format")
 
 type Weight float32
 
-func (w *Weight) MarshalJSON() ([]byte, error) {
-	jsonValue := fmt.Sprintf("%d kg", w)
+func (w Weight) MarshalJSON() ([]byte, error) {
+	jsonValue := fmt.Sprintf("%.3f kg", w)
 	quotedJSONValue := strconv.Quote(jsonValue)
 	return []byte(quotedJSONValue), nil
 }

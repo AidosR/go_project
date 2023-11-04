@@ -15,6 +15,8 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/play_tents", app.createPlayTentHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/play_tents/:id", app.showPlayTentHandler)
+	router.HandlerFunc(http.MethodPut, "/v1/play_tents/:id", app.updatePlayTentHandler)
+	router.HandlerFunc(http.MethodDelete, "/v1/play_tents/:id", app.deletePlayTentHandler)
 
 	return router
 }
