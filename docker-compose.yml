@@ -1,0 +1,33 @@
+version: '3'
+services:
+  app:
+    container_name: playground_go_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./cmd/api:/cmd/api
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  db:
+    container_name: playground_psql_database
+    image: postgres:latest
+    environment:
+      DATABASE_HOST: localhost
+      POSTGRES_USER: playground
+      POSTGRES_PASSWORD: playground
+      POSTGRES_DB: playground
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+networks:
+  backend:
